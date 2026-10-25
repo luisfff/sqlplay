@@ -48,7 +48,7 @@ You do **not** need to install anything globally. Pick whichever matches your
 package manager.
 
 To run the **SQLPlay Live fork**, use **Option C** or the
-[live demo](https://luisfff.github.io/sqlplay-live/). Options A and B run the
+[live demo](https://luisfff.github.io/sqlplay/). Options A and B run the
 published npm package, which may still show the original author credit and
 does not necessarily include this fork's changes.
 
@@ -72,7 +72,7 @@ sqlplay
 ### Option C — Run from source
 
 ```bash
-git clone https://github.com/luisfff/sqlplay-live.git sqlplay
+git clone https://github.com/luisfff/sqlplay.git sqlplay
 cd sqlplay
 npm ci
 npm run dev      # hot-reloading dev server (for development)

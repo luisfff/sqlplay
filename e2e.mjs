@@ -48,6 +48,12 @@ const reset = async (name, accept = true) => {
 };
 
 try {
+  const errorResponse = await fetch(`${BASE}%3Cscript%3E%ZZ`);
+  assert.equal(errorResponse.status, 500);
+  assert.match(errorResponse.headers.get("content-type"), /^text\/plain/);
+  assert.equal(await errorResponse.text(), "Internal error");
+  ok("CLI errors are generic plain text without reflected exception data");
+
   await page.goto(BASE, { waitUntil: "networkidle" });
 
   // --- Playground: default Tasks dataset loads + starter query runs ---

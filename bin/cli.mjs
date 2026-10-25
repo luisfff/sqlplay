@@ -101,9 +101,9 @@ Options:
         filePath = join(DIST, "index.html");
       }
       await serveFile(res, filePath);
-    } catch (err) {
-      res.writeHead(500);
-      res.end("Internal error: " + String(err));
+    } catch {
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Internal error");
     }
   });
 
