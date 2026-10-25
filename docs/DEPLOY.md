@@ -89,8 +89,8 @@ npm run build
 
 - **Vercel / Netlify:** framework preset = Vite; build `npm run build`; output
   `dist`. Nothing else required.
-- **GitHub Pages:** push `dist/` (or a CI action). Because `base: "./"`, it works
-  from a sub-path (`user.github.io/sqlplay/`) with no config.
+- **GitHub Pages:** use the automated workflow described below. Because
+  `base: "./"`, assets work from the `/sqlplay/` subpath without changing Vite.
 - **Any static server / S3 / Cloudflare Pages:** upload `dist/`.
 
 **Headers (recommended):** serve `.wasm` as `application/wasm` (most hosts do
@@ -98,6 +98,58 @@ automatically). The app doesn't strictly require COOP/COEP for basic sql.js, but
 setting them is harmless and future-proof.
 
 There is **no backend to deploy** for the web app — that's the whole point.
+
+### 2.1 GitHub Pages for this repository
+
+**Prerequisites for the private `luisfff/sqlplay` repository:**
+
+- GitHub Free only supports Pages from public repositories. Private repositories
+  require GitHub Pro (personal accounts), GitHub Team, or GitHub Enterprise Cloud
+  (organizations). For this personal repository, the owner must have an eligible
+  plan such as Pro. If Pages settings show an upgrade requirement, the owner
+  must upgrade or use another static host. Do not change visibility just to run CI.
+- A private repository does **not** automatically provide a private website.
+  Pages sites are normally public, including those built from private sources.
+  Restricted access is available for eligible organization project sites with
+  GitHub Enterprise Cloud, not a personal Pro repository. Review the published
+  app and bundled datasets before enabling public hosting.
+- An administrator must enable Actions and allow the official actions used by
+  `.github/workflows/pages.yml`. Private-repository Actions usage is subject to
+  the account's included minutes/billing and organization policies.
+
+Official references:
+[creating a Pages site and private-repository eligibility](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site),
+[GitHub's plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans),
+and [Pages access control](https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site).
+
+**One-time setup and first deployment:**
+
+1. In this repository, open **Settings → Pages → Build and deployment** and set
+   **Source: GitHub Actions**. This workflow does not enable Pages or upgrade the
+   account automatically.
+2. Merge this PR into `main`. Open **Actions → Website** to watch validation and
+   deployment. If needed, select **Run workflow** with branch **main** after
+   enabling Pages. Manual runs on other branches validate only.
+3. If the `github-pages` environment requires approval, approve the deployment.
+   Restrict that environment's deployment branches to `main` for defense in depth.
+4. After the deployment succeeds, use the URL in the `github-pages` environment.
+   The expected URL is **https://luisfff.github.io/sqlplay/**, unless account Pages
+   or custom-domain configuration dictates otherwise. The site is not live merely
+   because the workflow exists.
+
+The **Website** workflow uses Node.js 22 LTS and `npm ci`, builds the website and
+library, and runs browser tests, including a production `/sqlplay/` smoke test
+that checks the emitted SQLite WASM and executes `SELECT 1`. PR validation needs
+no Pages settings or deployment credentials. Only pushes to `main` or manual runs
+on `main` upload `dist/` as the Pages artifact and deploy it with the official
+configure/upload/deploy actions. Other events never publish PR artifacts.
+
+Builds have only `contents: read`; only the deployment job receives
+`pages: write` and `id-token: write`, using the built-in `GITHUB_TOKEN` and OIDC.
+No PAT or npm publishing secret is required. Deployments are serialized without
+canceling an in-progress production deployment. The relative Vite base and
+`?url` SQLite WASM import remain unchanged; only `dist/` is published, not the
+library, CLI, repository documentation, or source archive.
 
 ---
 
@@ -172,22 +224,18 @@ reachable:
 
 ---
 
-## 6. Suggested CI (GitHub Actions sketch)
+## 6. Continuous integration
 
-```yaml
-name: ci
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci
-      - run: npm run build:all
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+The checked-in [Website workflow](../.github/workflows/pages.yml) is the source
+of truth for CI and Pages deployment; see [section 2.1](#21-github-pages-for-this-repository).
+To run the same validation locally from the repository root:
+
+```bash
+npm ci
+npm run build:all
+npx playwright install --with-deps chromium
+npm run test:e2e
+npm run test:e2e:pages
 ```
 
 Publishing on tag (optional): add a `release` job that runs on `v*` tags,

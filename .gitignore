@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-lib/
+.vite/
+*.tsbuildinfo
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+.DS_Store

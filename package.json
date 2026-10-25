@@ -4,11 +4,11 @@
   "description": "An H2-Console-style SQL playground for JavaScript. Practice SQL in a real in-memory SQLite database that runs 100% in your browser — zero backend, zero setup.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luisfff/sqlplay-live.git"
+    "url": "git+https://github.com/luisfff/sqlplay.git"
   },
-  "homepage": "https://luisfff.github.io/sqlplay-live/",
+  "homepage": "https://luisfff.github.io/sqlplay/",
   "bugs": {
-    "url": "https://github.com/luisfff/sqlplay-live/issues"
+    "url": "https://github.com/luisfff/sqlplay/issues"
   },
   "type": "module",
   "bin": {
@@ -64,6 +64,7 @@
     "start": "node bin/cli.mjs",
     "docs:er": "node scripts/gen-er-svg.mjs",
     "test:e2e": "node e2e.mjs && node e2e-reset-lifecycle.mjs",
+    "test:e2e:pages": "node e2e-pages.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build:all"
   },
