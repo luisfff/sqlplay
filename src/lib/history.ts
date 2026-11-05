@@ -45,6 +45,10 @@ export function loadSolved(): Record<string, boolean> {
   return read<Record<string, boolean>>(SOLVED_KEY, {});
 }
 
+export function clearSolved(): void {
+  localStorage.removeItem(SOLVED_KEY);
+}
+
 export function markSolved(id: string): Record<string, boolean> {
   const solved = loadSolved();
   solved[id] = true;

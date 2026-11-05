@@ -16,7 +16,7 @@ try {
     const response = await route.fetch();
     await route.fulfill({ response, body: await response.text() + `
 const live = new Set();
-window.handles = {created: 0, closed: 0, live, confirmations: 0, fail: false, delay: 200};
+window.handles = {created: 0, closed: 0, live, confirmations: 0, accept: true, fail: false, delay: 200};
 for (const method of ["create", "open"]) {
   const original = InMemoryDatabase[method];
   InMemoryDatabase[method] = async function(...args) {
@@ -38,7 +38,7 @@ InMemoryDatabase.prototype.run = function(sql) {
   return run.call(this, window.handles.fail && sql.includes("PRAGMA foreign_keys = ON;")
     ? sql + "\\nINVALID SEED SQL;" : sql);
 };
-window.confirm = () => { window.handles.confirmations++; return true; };
+window.confirm = () => { window.handles.confirmations++; return window.handles.accept; };
 ` });
   });
   const ready = () => page.waitForFunction(() => {
@@ -97,6 +97,89 @@ window.confirm = () => { window.handles.confirmations++; return true; };
   assert.equal(await page.evaluate(() => window.handles.confirmations), 1);
   assert.equal(await page.evaluate(() => window.handles.created), 19);
   console.log("  PASS StrictMode startup, repeated/failed reset handle disposal and pending interaction guards");
+
+  const challengeReady = () => page.waitForFunction(() =>
+    !document.querySelector(".workspace")?.inert && !document.querySelector(".controls button")?.disabled
+  );
+  const setSql = async (sql) => {
+    await page.locator(".cm-content").click();
+    await page.keyboard.press("Control+A");
+    await page.keyboard.insertText(sql);
+  };
+  await page.evaluate(() => { window.handles.delay = 0; });
+  await page.getByRole("button", { name: "Challenges", exact: true }).click();
+  await challengeReady();
+  await page.getByRole("button", { name: "Show solution" }).click();
+  await page.getByRole("button", { name: /Check answer/ }).click();
+  await page.waitForSelector(".challenge-feedback.pass");
+  await page.locator(".challenge-group li").filter({ hasText: "Names and phones" }).click();
+  await challengeReady();
+  await page.getByRole("button", { name: "Show solution" }).click();
+  await page.getByRole("button", { name: /Check answer/ }).click();
+  await page.waitForSelector(".challenge-feedback.pass");
+  assert.match(await page.locator(".challenge-progress").innerText(), /Homework solved 1\//);
+  assert.match(await page.locator(".challenge-group-title").last().innerText(), /Completed 1\//i);
+  await setSql("CREATE TABLE reset_test (id INTEGER);");
+  await page.getByRole("button", { name: /Run/ }).first().click();
+  const before = await page.evaluate(() => ({
+    solved: localStorage.getItem("sqlplay.solved.v1"),
+    history: localStorage.getItem("sqlplay.history.v1"),
+    datasets: localStorage.getItem("sqlplay.userDatasets.v1"),
+  }));
+  const resetChallenges = page.getByRole("button", { name: "Reset challenges", exact: true });
+
+  await page.evaluate(() => { window.handles.accept = false; });
+  await resetChallenges.click();
+  assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.solved.v1")), before.solved);
+  assert.match(await page.locator(".cm-content").innerText(), /CREATE TABLE reset_test/);
+
+  await page.evaluate(() => { window.handles.accept = true; window.handles.fail = true; });
+  await resetChallenges.click();
+  await challengeReady();
+  assert.match(await page.getByRole("status").innerText(), /Failed to load dataset/);
+  assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.solved.v1")), before.solved);
+
+  await page.evaluate(() => {
+    window.handles.fail = false;
+    window.originalRemoveItem = Storage.prototype.removeItem;
+    Storage.prototype.removeItem = function(key) {
+      if (key === "sqlplay.solved.v1") throw new Error("storage unavailable");
+      return window.originalRemoveItem.call(this, key);
+    };
+  });
+  await resetChallenges.click();
+  await challengeReady();
+  assert.match(await page.getByRole("status").innerText(), /Could not clear challenge progress/);
+  assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.solved.v1")), before.solved);
+  await setSql("SELECT name FROM sqlite_master WHERE name = 'reset_test';");
+  await page.getByRole("button", { name: /Run/ }).first().click();
+  assert.equal(await page.locator(".results tbody tr").count(), 1);
+  await page.evaluate(() => { Storage.prototype.removeItem = window.originalRemoveItem; });
+
+  const historyBeforeReset = await page.evaluate(() => localStorage.getItem("sqlplay.history.v1"));
+  await resetChallenges.click();
+  await challengeReady();
+  await balanced();
+  assert.match(await page.getByRole("status").innerText(), /Challenge progress and current database reset/);
+  assert.match(await page.locator(".challenge-progress").innerText(), /Homework solved 0\//);
+  assert.match(await page.locator(".challenge-group-title").last().innerText(), /Completed 0\//i);
+  assert.equal(await page.getByRole("button", { name: /Check answer/ }).isEnabled(), true);
+  assert.match(await page.locator(".cm-content").innerText(), /Write your query below/);
+  assert.deepEqual(await page.evaluate(() => ({
+    solved: localStorage.getItem("sqlplay.solved.v1"),
+    history: localStorage.getItem("sqlplay.history.v1"),
+    datasets: localStorage.getItem("sqlplay.userDatasets.v1"),
+  })), { solved: null, history: historyBeforeReset, datasets: before.datasets });
+  await setSql("SELECT name FROM sqlite_master WHERE name = 'reset_test';");
+  await page.getByRole("button", { name: /Run/ }).first().click();
+  assert.equal(await page.locator(".results tbody tr").count(), 0);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await ready();
+  await page.getByRole("button", { name: "Challenges", exact: true }).click();
+  await challengeReady();
+  assert.match(await page.locator(".challenge-progress").innerText(), /Homework solved 0\//);
+  assert.match(await page.locator(".challenge-group-title").last().innerText(), /Completed 0\//i);
+  console.log("  PASS challenge reset, cancellation, failure preservation and persistence");
 } finally {
   await browser?.close();
   server.kill();
