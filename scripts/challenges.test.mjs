@@ -18,9 +18,13 @@ test("assignment challenges are first, unique, and return the requested results"
   ]);
   const ids = [
     "tasks-7", "tasks-19", "tasks-20", "tasks-21", "tasks-22",
-    "tasks-23", "tasks-24", "tasks-16", "tasks-25", "tasks-26",
+    "tasks-23", "tasks-24",
   ];
-  assert.deepEqual(CHALLENGES.slice(0, 10).map((c) => c.id), ids);
+  assert.deepEqual(CHALLENGES.slice(0, ids.length).map((c) => c.id), ids);
+  assert.equal(CHALLENGES.length, 20);
+  for (const id of ["tasks-15", "tasks-16", "tasks-17", "tasks-18", "tasks-25", "tasks-26"]) {
+    assert.ok(!CHALLENGES.some((challenge) => challenge.id === id), id);
+  }
   assert.equal(new Set(CHALLENGES.map((c) => c.id)).size, CHALLENGES.length);
   assert.equal(new Set(CHALLENGES.map((c) => c.title)).size, CHALLENGES.length);
   for (const challenge of CHALLENGES) {
@@ -41,7 +45,6 @@ test("assignment challenges are first, unique, and return the requested results"
       const tasks = rows("SELECT * FROM task");
       const statuses = rows("SELECT id, name FROM status");
       const names = new Map(statuses);
-      const counts = statuses.map(([id, name]) => [name, tasks.filter((task) => task[6] === id).length]);
       const newest = [...tasks].sort((a, b) => b[3].localeCompare(a[3]));
       check("tasks-7", [[tasks.length]]);
       check("tasks-19", [[tasks.filter((task) => task[5] === null || Number.isNaN(Date.parse(task[5]))).length]]);
@@ -50,9 +53,6 @@ test("assignment challenges are first, unique, and return the requested results"
       check("tasks-22", newest, true);
       check("tasks-23", [newest[0]]);
       check("tasks-24", tasks.filter((task) => /database/i.test(task[1]) || /database/i.test(task[2] ?? "")).map((task) => [task[1], task[5]]));
-      check("tasks-16", tasks.map((task) => [task[1], names.get(task[6])]));
-      check("tasks-25", counts);
-      check("tasks-26", counts.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => [name]), true);
     };
     assert.equal(rows("SELECT COUNT(*) FROM task")[0][0], 35);
     assert.equal(rows("SELECT COUNT(*) FROM task WHERE due_date IS NULL")[0][0], 8);
