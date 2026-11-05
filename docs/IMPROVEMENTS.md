@@ -85,4 +85,4 @@ reviewer would raise in a production readiness review.
 | E2E (browser) | ✅ 12 Playwright checks incl. crash regression | keep |
 | Server HTTP | ✅ ad-hoc probes during audit | promote to a committed test |
 | Unit | ❌ none | **add vitest** (quick win #1) |
-| Solution validation | ✅ 18-challenge Tasks harness | keep |
+| Solution validation | ✅ 26-challenge Tasks harness | keep |

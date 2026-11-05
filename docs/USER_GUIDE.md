@@ -252,7 +252,7 @@ so.
 
 Switch to **Challenges** in the top bar.
 
-- The sidebar lists 18 Tasks database problems, each tagged Easy or Medium
+- The sidebar lists 26 Tasks database problems, each tagged Easy or Medium
   (colored dot) with a ✓ once solved. A progress bar shows how many you've
   solved.
 - Click a challenge to load its dataset and read the prompt.

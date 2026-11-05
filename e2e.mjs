@@ -401,40 +401,19 @@ try {
   const tasksChallenges = challengeModule.CHALLENGES.filter(
     (challenge) => challenge.datasetId === "tasks"
   );
-  const tasksChallengeMetadata = {
-    ids: tasksChallenges.map((challenge) => challenge.id),
-    joins: tasksChallenges
-      .filter((challenge) => /\bJOIN\b/i.test(challenge.solution))
-      .map((challenge) => challenge.id),
-  };
-  assert.equal(tasksChallengeMetadata.ids.length, 18);
-  assert.equal(new Set(tasksChallengeMetadata.ids).size, 18);
-  assert.ok(tasksChallengeMetadata.ids.every((id) => id.startsWith("tasks-")));
-  assert.deepEqual(tasksChallengeMetadata.joins, ["tasks-16", "tasks-17", "tasks-18"]);
+  const taskIds = tasksChallenges.map((challenge) => challenge.id);
+  assert.equal(taskIds.length, 26);
+  assert.equal(new Set(taskIds).size, 26);
+  assert.ok(taskIds.every((id) => id.startsWith("tasks-")));
+  assert.deepEqual(taskIds.slice(0, 10), [
+    "tasks-7", "tasks-19", "tasks-20", "tasks-21", "tasks-22",
+    "tasks-23", "tasks-24", "tasks-16", "tasks-25", "tasks-26",
+  ]);
   const tasksGroup = page.locator(".challenge-group").filter({ hasText: "Tasks database" });
-  assert.equal(await tasksGroup.locator("li").count(), 18);
-  const tasksTitles = [
-    "Task titles and IDs",
-    "Tasks in progress",
-    "Tasks without due dates",
-    "Tasks alphabetically",
-    "Five highest task IDs",
-    "Unassigned tasks",
-    "Count the tasks",
-    "Rename a task",
-    "Mark a task done",
-    "Assign an unassigned task",
-    "Set unassigned task status",
-    "Delete one task",
-    "Remove one task tag",
-    "Create task notes table",
-    "Create reminders table",
-    "Tasks and their statuses",
-    "Tasks and assigned users",
-    "Tasks and tags",
-  ];
-  for (const title of tasksTitles) {
-    await tasksGroup.locator("li").filter({ hasText: title }).click();
+  assert.equal(await tasksGroup.locator("li").count(), 26);
+  for (const [index, { title }] of tasksChallenges.entries()) {
+    assert.equal(await tasksGroup.locator("li").nth(index).locator(".challenge-title-text").innerText(), title);
+    await tasksGroup.locator("li").nth(index).click();
     await page.waitForFunction(
       (selectedTitle) => document.querySelector(".challenge-head strong")?.textContent?.includes(selectedTitle),
       title
@@ -445,7 +424,7 @@ try {
       document.querySelector(".challenge-feedback")?.classList.contains("pass")
     );
   }
-  ok("Tasks challenge IDs, dataset, exactly three JOINs, and all 18 reference solutions");
+  ok("Tasks challenge IDs, order, dataset, and all 26 reference solutions");
 
   const answerChallengeWith = async (title, sql) => {
     await tasksGroup.locator("li").filter({ hasText: title }).click();

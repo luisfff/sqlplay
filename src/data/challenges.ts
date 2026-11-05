@@ -18,6 +18,120 @@ export interface Challenge {
 
 export const CHALLENGES: Challenge[] = [
   {
+    id: "tasks-7",
+    title: "Count the tasks",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt: "Return the total number of rows in task as a single value.",
+    hint: "COUNT(*) counts every row.",
+    solution: "SELECT COUNT(*) FROM task;",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-19",
+    title: "Count tasks without valid due dates",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt:
+      "Return the number of tasks with no valid due date, including NULL or unparseable dates, as a single value.",
+    hint: "SQLite's datetime() returns NULL for missing or unparseable dates.",
+    solution: "SELECT COUNT(*) FROM task WHERE datetime(due_date) IS NULL;",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-20",
+    title: "Done tasks",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt: "Return all columns of tasks marked Done.",
+    hint: "Find the Done status in the status table and filter task.status_id.",
+    solution: "SELECT * FROM task WHERE status_id = (SELECT id FROM status WHERE name = 'Done');",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-21",
+    title: "Tasks not done",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt: "Return all columns of tasks not marked Done.",
+    hint: "Exclude the status id corresponding to Done.",
+    solution: "SELECT * FROM task WHERE status_id != (SELECT id FROM status WHERE name = 'Done');",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-22",
+    title: "Tasks by creation date",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt: "Return all columns of every task, ordered by creation date with the most recent first.",
+    hint: "Sort the created column in descending order.",
+    solution: "SELECT * FROM task ORDER BY created DESC;",
+    orderMatters: true,
+  },
+  {
+    id: "tasks-23",
+    title: "Most recently created task",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt: "Return all columns of the single most recently created task.",
+    hint: "Sort by created descending and use LIMIT.",
+    solution: "SELECT * FROM task ORDER BY created DESC LIMIT 1;",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-24",
+    title: "Tasks mentioning database",
+    difficulty: "Easy",
+    datasetId: "tasks",
+    prompt:
+      "Return the title and due date of tasks whose title or description contains 'database', ignoring case. Column order: title, due_date.",
+    hint: "Use LIKE with wildcards on both title and description.",
+    solution: "SELECT title, due_date FROM task WHERE title LIKE '%database%' OR description LIKE '%database%';",
+    orderMatters: false,
+  },
+  {
+    id: "tasks-16",
+    title: "Tasks and their statuses",
+    difficulty: "Medium",
+    datasetId: "tasks",
+    prompt:
+      "Return every task title with its status name. Column order: task title, status name.",
+    hint: "Join task to status using status_id and id.",
+    solution: `SELECT task.title, status.name
+FROM task
+JOIN status ON status.id = task.status_id;`,
+    orderMatters: false,
+  },
+  {
+    id: "tasks-25",
+    title: "Count tasks by status",
+    difficulty: "Medium",
+    datasetId: "tasks",
+    prompt:
+      "Return each status name and the number of tasks with that status, including statuses with no tasks. Column order: status name, task count.",
+    hint: "LEFT JOIN status to task, group by status, and count task IDs.",
+    solution: `SELECT status.name, COUNT(task.id)
+FROM status
+LEFT JOIN task ON task.status_id = status.id
+GROUP BY status.id, status.name;`,
+    orderMatters: false,
+  },
+  {
+    id: "tasks-26",
+    title: "Statuses by task count",
+    difficulty: "Medium",
+    datasetId: "tasks",
+    prompt:
+      "Return all status names, ordered by number of tasks from most to fewest, including statuses with no tasks. Break ties by status name alphabetically.",
+    hint: "Group a LEFT JOIN by status and order by the task count.",
+    solution: `SELECT status.name
+FROM status
+LEFT JOIN task ON task.status_id = status.id
+GROUP BY status.id, status.name
+ORDER BY COUNT(task.id) DESC, status.name ASC;`,
+    orderMatters: true,
+  },
+  {
     id: "tasks-1",
     title: "Task titles and IDs",
     difficulty: "Easy",
@@ -82,16 +196,6 @@ export const CHALLENGES: Challenge[] = [
     hint: "Test user_id with IS NULL.",
     solution: "SELECT id, title FROM task WHERE user_id IS NULL ORDER BY id;",
     orderMatters: true,
-  },
-  {
-    id: "tasks-7",
-    title: "Count the tasks",
-    difficulty: "Easy",
-    datasetId: "tasks",
-    prompt: "Return the total number of rows in task as a single value.",
-    hint: "COUNT(*) counts every row.",
-    solution: "SELECT COUNT(*) FROM task;",
-    orderMatters: false,
   },
   {
     id: "tasks-8",
@@ -199,20 +303,6 @@ export const CHALLENGES: Challenge[] = [
 );`,
     orderMatters: false,
     checkDatabaseState: true,
-  },
-  {
-    id: "tasks-16",
-    title: "Tasks and their statuses",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return every task title with its status name. Column order: task title, status name. Order by task id ascending.",
-    hint: "Join task to status using status_id and id.",
-    solution: `SELECT task.title, status.name
-FROM task
-JOIN status ON status.id = task.status_id
-ORDER BY task.id;`,
-    orderMatters: true,
   },
   {
     id: "tasks-17",

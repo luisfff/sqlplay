@@ -3,8 +3,6 @@ import type { Challenge } from "../data/challenges";
 import type { CompareResult } from "../lib/compare";
 import { findDataset } from "../data/samples";
 
-const DIFF_RANK: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2 };
-
 interface ListProps {
   challenges: Challenge[];
   activeId: string | null;
@@ -20,7 +18,7 @@ export function ChallengeList({
 }: ListProps) {
   const solvedCount = challenges.filter((c) => solved[c.id]).length;
 
-  // Group by dataset (preserving first-seen order), sort each by difficulty.
+  // Group by dataset while preserving the configured challenge order.
   const order: string[] = [];
   const groups: Record<string, Challenge[]> = {};
   for (const c of challenges) {
@@ -30,10 +28,6 @@ export function ChallengeList({
     }
     groups[c.datasetId].push(c);
   }
-  for (const id of order) {
-    groups[id].sort((a, b) => DIFF_RANK[a.difficulty] - DIFF_RANK[b.difficulty]);
-  }
-
   return (
     <div className="challenge-list">
       <div className="challenge-progress">
