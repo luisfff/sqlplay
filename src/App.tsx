@@ -192,18 +192,13 @@ export default function App() {
     void openDataset(DEFAULT_DATASET_ID);
   }, [currentUserDataset, openDataset]);
 
-  const resetDataset = useCallback((toTasks: boolean) => {
+  const resetDataset = useCallback(() => {
     if (!db || pendingRef.current) return;
-    const target = toTasks ? DEFAULT_DATASET_ID : datasetId;
-    const message = toTasks
-      ? "Reset to a fresh Tasks database and restore its starter query? All unsaved database changes will be discarded. Saved datasets, query history and challenge progress will be kept."
-      : currentUserDataset
+    const message = currentUserDataset
       ? `Reset current dataset "${currentUserDataset.name}" to its saved snapshot? Unsaved database changes will be discarded; the saved snapshot will not be changed.`
       : `Reset current dataset "${findDataset(datasetId).name}" to its original seed? Unsaved database changes will be discarded.`;
     if (!window.confirm(message)) return;
-    void openDataset(target, toTasks ? undefined : queryRef.current,
-      toTasks ? "Reset to Tasks database — original seed restored." : undefined,
-      !toTasks && datasetId.startsWith("user:"));
+    void openDataset(datasetId, queryRef.current, undefined, datasetId.startsWith("user:"));
   }, [db, datasetId, currentUserDataset, openDataset]);
 
   // Boot: load the default dataset.
@@ -410,11 +405,8 @@ export default function App() {
           )}
           {mode === "play" && (
             <>
-              <button className="btn" onClick={() => resetDataset(false)} disabled={!db || loading}>
+              <button className="btn" onClick={resetDataset} disabled={!db || loading}>
                 Reset current dataset
-              </button>
-              <button className="btn" onClick={() => resetDataset(true)} disabled={!db || loading}>
-                Reset to Tasks database
               </button>
             </>
           )}

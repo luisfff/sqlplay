@@ -125,7 +125,7 @@ Press **Ctrl+C** in the terminal to stop the server.
 - **Mode switch** (top): toggle between **Playground** and **Challenges**.
 - **Dataset picker** (Playground only): choose a sample or one of your saved
   datasets.
-- **Toolbar buttons**: Run, Save dataset, History, Help, and dataset resets.
+- **Toolbar buttons**: Run, Save dataset, History, Help, and reset current dataset.
 - **Sidebar**: the live **schema** (Playground) or the **challenge list**.
 - **Output tabs** (Playground): Results, ER Diagram, Data editor.
 - **Status bar**: shows what just happened, including SQL errors.
@@ -143,11 +143,9 @@ selected saved dataset's snapshot, discarding unsaved database changes (inserts,
 deletes, dropped tables…). The selected dataset and editor text are kept. If its
 saved snapshot is missing, the reset fails without changing the working database.
 
-**Reset to Tasks database:** always switches to a fresh Tasks database and restores
-its starter query, regardless of the selected dataset or current schema.
-
-Both Playground resets ask for confirmation; cancel changes nothing. Neither
-changes saved datasets, query history, or challenge progress.
+Reset asks for confirmation; cancel changes nothing. It does not change saved
+datasets, query history, or challenge progress. To switch to a fresh Tasks
+database, select **Tasks database** from the Dataset dropdown.
 
 **Run only part of a script:** select (highlight) one or more statements in the
 editor and run — only the selection executes. With nothing selected, the whole
