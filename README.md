@@ -40,8 +40,8 @@ so you can focus on the question rather than setting up the data.
 2. Write a query in the editor.
 3. Select **Check answer** to see whether your result matches what the question
    asks for.
-4. If you get stuck, select **Hint** for a nudge. **Show solution** reveals an
-   example answer you can learn from.
+4. If you get stuck, select **Hint** for a nudge. When available, **Show
+   solution** reveals an example answer you can learn from.
 
 Your completed challenges are remembered when you return to the website.
 
