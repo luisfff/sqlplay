@@ -44,6 +44,9 @@ so you can focus on the question rather than setting up the data.
    solution** reveals an example answer you can learn from.
 
 Your completed challenges are remembered when you return to the website.
+To start over, select **Reset challenges** and confirm. This clears all
+homework and class exercise progress and restores the current challenge's
+database and starter query. Saved datasets and query history are kept.
 
 Class exercises follow the [Databases Week 1 session plan](https://github.com/luisfff/hack-your-future-presentations/blob/main/hackyourfuture-databases-week1-session-plan.md).
 Select an exercise and use **Run** to work through its steps on the same

@@ -101,6 +101,11 @@ function AppHelp() {
           cancel changes nothing. Neither changes saved datasets, history or progress.
         </li>
         <li>
+          In Challenges, <strong>Reset challenges</strong> clears all homework
+          and class exercise progress and restores the current challenge's
+          database and starter query. Saved datasets and history are kept.
+        </li>
+        <li>
           The working database is <strong>in-memory</strong>: refreshing the
           page, switching datasets, or changing challenge <strong>wipes it</strong>{" "}
           — unless you <strong>Save</strong> it.
