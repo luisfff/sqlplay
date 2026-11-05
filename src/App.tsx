@@ -8,11 +8,11 @@ import {
   type TableInfo,
 } from "./engine/db";
 import { DEFAULT_DATASET_ID, SAMPLE_DATASETS, findDataset } from "./data/samples";
-import { CHALLENGES } from "./data/challenges";
+import { CHALLENGES, type Challenge } from "./data/challenges";
 import { SqlEditor } from "./components/SqlEditor";
 import { ResultsTable } from "./components/ResultsTable";
 import { SchemaTree } from "./components/SchemaTree";
-import { ChallengeList, ChallengeBar, ClassExerciseBar, isClassExercise, type Activity } from "./components/Challenge";
+import { ChallengeList, ChallengeBar } from "./components/Challenge";
 import { ERDiagram } from "./components/ERDiagram";
 import { DataEditor } from "./components/DataEditor";
 import { HelpModal } from "./components/HelpModal";
@@ -84,7 +84,7 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [solved, setSolved] = useState<Record<string, boolean>>({});
-  const [activeChallenge, setActiveChallenge] = useState<Activity | null>(null);
+  const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [feedback, setFeedback] = useState<CompareResult | null>(null);
 
   const queryRef = useRef<string>("");
@@ -236,11 +236,11 @@ export default function App() {
   }, []);
 
   const selectChallenge = useCallback(
-    async (c: Activity) => {
+    async (c: Challenge) => {
       if (pendingRef.current) return;
       const loaded = await openDataset(
         c.datasetId,
-        `-- ${c.title}\n-- ${isClassExercise(c) ? "Write SQL and click Run." : 'Write your query below, then click "Check answer".'}\n\n`
+        `-- ${c.title}\n-- Write your query below, then click "Check answer".\n\n`
       );
       if (loaded) setActiveChallenge(c);
     },
@@ -248,7 +248,7 @@ export default function App() {
   );
 
   const checkChallenge = useCallback(async () => {
-    if (!activeChallenge || isClassExercise(activeChallenge) || pendingRef.current) return;
+    if (!activeChallenge || pendingRef.current) return;
     pendingRef.current = true;
     setLoading(true);
     const generation = generationRef.current;
@@ -297,7 +297,6 @@ export default function App() {
   const showSolution = useCallback(() => {
     if (
       !activeChallenge ||
-      isClassExercise(activeChallenge) ||
       activeChallenge.hideSolution
     ) return;
     setQuery(
@@ -465,28 +464,20 @@ export default function App() {
 
         <main className="main">
           {mode === "learn" && activeChallenge && (
-            isClassExercise(activeChallenge) ? (
-              <ClassExerciseBar
-                exercise={activeChallenge}
-                completed={!!solved[activeChallenge.id]}
-                onComplete={() => setSolved(markSolved(activeChallenge.id))}
-              />
-            ) : (
-              <ChallengeBar
-                key={activeChallenge.id}
-                challenge={activeChallenge}
-                feedback={feedback}
-                onCheck={checkChallenge}
-                onShowSolution={showSolution}
-              />
-            )
+            <ChallengeBar
+              key={activeChallenge.id}
+              challenge={activeChallenge}
+              feedback={feedback}
+              onCheck={checkChallenge}
+              onShowSolution={showSolution}
+            />
           )}
           <SqlEditor
             key={dbVersion}
             value={query}
             onChange={setQuery}
             schema={schema}
-            onRun={mode === "learn" && activeChallenge && !isClassExercise(activeChallenge) ? checkChallenge : run}
+            onRun={mode === "learn" && activeChallenge ? checkChallenge : run}
             onSelectionChange={(s) => (selectionRef.current = s)}
           />
           <div className="divider" />

@@ -1,19 +1,14 @@
 import { useState } from "react";
 import type { Challenge } from "../data/challenges";
-import { CLASS_EXERCISES, type ClassExercise } from "../data/classExercises";
+import { CLASS_EXERCISES } from "../data/classExercises";
 import type { CompareResult } from "../lib/compare";
 import { findDataset } from "../data/samples";
-
-export type Activity = Challenge | ClassExercise;
-export function isClassExercise(activity: Activity): activity is ClassExercise {
-  return "steps" in activity;
-}
 
 interface ListProps {
   challenges: Challenge[];
   activeId: string | null;
   solved: Record<string, boolean>;
-  onSelect: (c: Activity) => void;
+  onSelect: (c: Challenge) => void;
 }
 
 export function ChallengeList({
@@ -83,28 +78,6 @@ export function ChallengeList({
             </li>
           ))}
         </ul>
-      </div>
-    </div>
-  );
-}
-
-export function ClassExerciseBar({ exercise, completed, onComplete }: {
-  exercise: ClassExercise;
-  completed: boolean;
-  onComplete: () => void;
-}) {
-  return (
-    <div className="challenge-bar class-exercise-bar">
-      <div className="challenge-head"><strong>{exercise.title}</strong></div>
-      <p className="challenge-prompt">{exercise.introduction}</p>
-      <ol className="class-exercise-steps">
-        {exercise.steps.map((step, index) => <li key={index}>{step}</li>)}
-      </ol>
-      <div className="challenge-actions">
-        <button className="btn primary" onClick={onComplete} disabled={completed}>
-          {completed ? "Completed" : "Mark complete"}
-        </button>
-        <span>Self-marked; answers are not checked automatically.</span>
       </div>
     </div>
   );

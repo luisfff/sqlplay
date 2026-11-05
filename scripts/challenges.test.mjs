@@ -72,13 +72,53 @@ test("assignment challenges are first, unique, and return the requested results"
   }
 });
 
-test("class practice covers the session plan and has separate progress IDs", async () => {
-  const [{ CHALLENGES }, { CLASS_EXERCISES }] = await Promise.all([
+test("class exercises are individual challenges with valid, meaningful solutions", async () => {
+  const [{ CHALLENGES }, { CLASS_EXERCISES }, { TASKS_SQL }, SQL] = await Promise.all([
     loadDataModule("../src/data/challenges.ts"),
     loadDataModule("../src/data/classExercises.ts"),
+    loadDataModule("../src/data/tasks.ts"),
+    initSqlJs(),
   ]);
-  assert.deepEqual(CLASS_EXERCISES.map((exercise) => exercise.steps.length), [6, 12, 6, 9, 3, 5, 8]);
+  assert.deepEqual(CLASS_EXERCISES.slice(0, 12).map((exercise) => exercise.id),
+    Array.from({ length: 12 }, (_, index) => `class-select-${index + 1}`));
   assert.ok(CLASS_EXERCISES.every((exercise) => exercise.datasetId === "tasks"));
+  assert.ok(CLASS_EXERCISES.every((exercise) => exercise.prompt && exercise.hint && exercise.solution && !exercise.hideSolution));
+  assert.ok(CLASS_EXERCISES.every((exercise) => !exercise.id.includes("explore")));
   const ids = [...CHALLENGES, ...CLASS_EXERCISES].map((exercise) => exercise.id);
   assert.equal(new Set(ids).size, ids.length);
+  const db = new SQL.Database();
+  try {
+    db.run(TASKS_SQL);
+    const seed = db.export();
+    const expected = [
+      "SELECT name, phone FROM user",
+      "SELECT * FROM user ORDER BY name",
+      "SELECT name FROM user WHERE id = 10",
+      "SELECT * FROM task ORDER BY created ASC LIMIT 3",
+      "SELECT * FROM task WHERE description IS NULL",
+      "SELECT * FROM user WHERE email LIKE '%.com'",
+      "SELECT title FROM task WHERE status_id = 1",
+      "SELECT * FROM task WHERE user_id = 1 AND status_id = 2",
+      "SELECT * FROM task WHERE title LIKE '%database%'",
+      "SELECT name FROM user WHERE phone IS NULL",
+      "SELECT title, created FROM task ORDER BY created DESC LIMIT 5",
+      "SELECT * FROM task WHERE status_id IN (1, 2) ORDER BY title",
+    ];
+    for (const [index, exercise] of CLASS_EXERCISES.entries()) {
+      const exerciseDb = new SQL.Database(seed);
+      try {
+        const result = exerciseDb.exec(exercise.solution);
+        if (index < expected.length) {
+          assert.deepEqual(result, db.exec(expected[index]), exercise.id);
+        } else {
+          assert.ok(exercise.checkDatabaseState, exercise.id);
+          assert.notDeepEqual(exerciseDb.export(), seed, `${exercise.id} must change the database`);
+        }
+      } finally {
+        exerciseDb.close();
+      }
+    }
+  } finally {
+    db.close();
+  }
 });
