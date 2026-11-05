@@ -1,13 +1,19 @@
 import { useState } from "react";
 import type { Challenge } from "../data/challenges";
+import { CLASS_EXERCISES, type ClassExercise } from "../data/classExercises";
 import type { CompareResult } from "../lib/compare";
 import { findDataset } from "../data/samples";
+
+export type Activity = Challenge | ClassExercise;
+export function isClassExercise(activity: Activity): activity is ClassExercise {
+  return "steps" in activity;
+}
 
 interface ListProps {
   challenges: Challenge[];
   activeId: string | null;
   solved: Record<string, boolean>;
-  onSelect: (c: Challenge) => void;
+  onSelect: (c: Activity) => void;
 }
 
 export function ChallengeList({
@@ -31,7 +37,7 @@ export function ChallengeList({
   return (
     <div className="challenge-list">
       <div className="challenge-progress">
-        Solved {solvedCount}/{challenges.length}
+        Homework solved {solvedCount}/{challenges.length}
         <div className="progress-track">
           <div
             className="progress-fill"
@@ -39,6 +45,7 @@ export function ChallengeList({
           />
         </div>
       </div>
+      <div className="challenge-section-title">Homework</div>
       {order.map((datasetId) => (
         <div key={datasetId} className="challenge-group">
           <div className="challenge-group-title">
@@ -59,6 +66,46 @@ export function ChallengeList({
           </ul>
         </div>
       ))}
+      <div className="challenge-section-title">Class exercises</div>
+      <div className="challenge-group">
+        <div className="challenge-group-title">
+          Week 1 · Completed {CLASS_EXERCISES.filter((c) => solved[c.id]).length}/{CLASS_EXERCISES.length}
+        </div>
+        <ul>
+          {CLASS_EXERCISES.map((c) => (
+            <li
+              key={c.id}
+              className={c.id === activeId ? "active" : ""}
+              onClick={() => onSelect(c)}
+            >
+              <span className="check">{solved[c.id] ? "✓" : "○"}</span>
+              <span className="challenge-title-text">{c.title}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export function ClassExerciseBar({ exercise, completed, onComplete }: {
+  exercise: ClassExercise;
+  completed: boolean;
+  onComplete: () => void;
+}) {
+  return (
+    <div className="challenge-bar class-exercise-bar">
+      <div className="challenge-head"><strong>{exercise.title}</strong></div>
+      <p className="challenge-prompt">{exercise.introduction}</p>
+      <ol className="class-exercise-steps">
+        {exercise.steps.map((step, index) => <li key={index}>{step}</li>)}
+      </ol>
+      <div className="challenge-actions">
+        <button className="btn primary" onClick={onComplete} disabled={completed}>
+          {completed ? "Completed" : "Mark complete"}
+        </button>
+        <span>Self-marked; answers are not checked automatically.</span>
+      </div>
     </div>
   );
 }
