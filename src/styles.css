@@ -482,6 +482,22 @@ kbd {
   padding: 8px 14px 3px;
   color: var(--text-dim);
 }
+.challenge-section-title {
+  padding: 10px 14px 3px;
+  font-weight: 700;
+}
+.class-exercise-bar {
+  max-height: 45%;
+  overflow-y: auto;
+}
+.class-exercise-steps {
+  padding-left: 24px;
+  line-height: 1.5;
+}
+.class-exercise-bar .challenge-actions {
+  align-items: center;
+  flex-wrap: wrap;
+}
 .challenge-group-title.easy {
   color: var(--accent-2);
 }

@@ -32,8 +32,8 @@ tables, or count items.
 
 ## Use datasets for challenges
 
-Each challenge has a question to answer using data. Select **Challenges** and
-choose a question from the list. SQLPlay loads the dataset for that challenge,
+Select **Challenges** to find **Homework** and **Class exercises**. Each homework
+challenge has a question to answer using data. SQLPlay loads its dataset
 so you can focus on the question rather than setting up the data.
 
 1. Read the challenge instructions.
@@ -44,6 +44,12 @@ so you can focus on the question rather than setting up the data.
    solution** reveals an example answer you can learn from.
 
 Your completed challenges are remembered when you return to the website.
+
+Class exercises follow the [Databases Week 1 session plan](https://github.com/luisfff/hack-your-future-presentations/blob/main/hackyourfuture-databases-week1-session-plan.md).
+Select an exercise and use **Run** to work through its steps on the same
+database. Mark it complete yourself when finished; class exercises are not
+automatically checked. Selecting another exercise starts a fresh database, so
+complete related steps together and copy any SQL you want to keep.
 
 ## Tips
 

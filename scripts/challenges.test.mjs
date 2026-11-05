@@ -71,3 +71,14 @@ test("assignment challenges are first, unique, and return the requested results"
     db.close();
   }
 });
+
+test("class practice covers the session plan and has separate progress IDs", async () => {
+  const [{ CHALLENGES }, { CLASS_EXERCISES }] = await Promise.all([
+    loadDataModule("../src/data/challenges.ts"),
+    loadDataModule("../src/data/classExercises.ts"),
+  ]);
+  assert.deepEqual(CLASS_EXERCISES.map((exercise) => exercise.steps.length), [6, 12, 6, 9, 3, 5, 8]);
+  assert.ok(CLASS_EXERCISES.every((exercise) => exercise.datasetId === "tasks"));
+  const ids = [...CHALLENGES, ...CLASS_EXERCISES].map((exercise) => exercise.id);
+  assert.equal(new Set(ids).size, ids.length);
+});

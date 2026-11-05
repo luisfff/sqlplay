@@ -476,6 +476,37 @@ try {
     await answerChallengeWith("Create task notes table", "CREATE TABLE task_note (id INTEGER);"),
     /fail/
   );
+  assert.deepEqual(await page.locator(".challenge-section-title").allTextContents(), ["Homework", "Class exercises"]);
+  const classGroup = page.locator(".challenge-group").filter({ hasText: "Week 1" });
+  assert.equal(await classGroup.locator("li").count(), 7);
+  await classGroup.locator("li").filter({ hasText: "Practice INSERT and DELETE" }).click();
+  await page.waitForFunction(() => document.querySelector(".challenge-head strong")?.textContent?.includes("Practice INSERT and DELETE"));
+  assert.equal(await page.locator(".class-exercise-steps li").count(), 9);
+  assert.equal(await page.getByRole("button", { name: /Check answer/ }).count(), 0);
+  assert.match(await page.locator(".class-exercise-bar").innerText(), /not checked automatically/);
+  const runClassSql = async (sql) => {
+    await page.locator(".cm-content").click();
+    await page.keyboard.press("Control+A");
+    await page.keyboard.insertText(sql);
+    await page.keyboard.press("Control+Enter");
+  };
+  await runClassSql("INSERT INTO tag (name) VALUES ('Class practice');");
+  await runClassSql("SELECT name FROM tag WHERE name = 'Class practice';");
+  assert.deepEqual(await resultRows(), [["Class practice"]]);
+  await runClassSql("DELETE FROM tag WHERE name = 'Class practice';");
+  await runClassSql("SELECT name FROM tag WHERE name = 'Class practice';");
+  assert.deepEqual(await resultRows(), []);
+  await page.getByRole("button", { name: "Mark complete" }).click();
+  assert.equal(await page.getByRole("button", { name: "Completed", exact: true }).isDisabled(), true);
+  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem("sqlplay.solved.v1"))["class-insert-delete"]), true);
+  await classGroup.locator("li").filter({ hasText: "Practice SELECT" }).click();
+  await page.waitForFunction(() => document.querySelector(".challenge-head strong")?.textContent?.includes("Practice SELECT"));
+  assert.equal(await page.locator(".class-exercise-steps li").count(), 12);
+  await classGroup.locator("li").filter({ hasText: "Practice INSERT and DELETE" }).click();
+  await page.waitForFunction(() => document.querySelector(".challenge-head strong")?.textContent?.includes("Practice INSERT and DELETE"));
+  assert.equal(await page.getByRole("button", { name: "Completed", exact: true }).isDisabled(), true);
+  ok("Class exercises run sequential SQL, reset on switching, and retain self-marked progress");
+
   await page.getByRole("button", { name: "Playground", exact: true }).click();
   await execute("SELECT title FROM task WHERE id = 1;");
   assert.deepEqual(await resultRows(), [["Wash clothes"]]);
