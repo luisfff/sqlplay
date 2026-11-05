@@ -402,15 +402,16 @@ try {
     (challenge) => challenge.datasetId === "tasks"
   );
   const taskIds = tasksChallenges.map((challenge) => challenge.id);
-  assert.equal(taskIds.length, 26);
-  assert.equal(new Set(taskIds).size, 26);
+  assert.equal(taskIds.length, 20);
+  assert.equal(new Set(taskIds).size, 20);
   assert.ok(taskIds.every((id) => id.startsWith("tasks-")));
-  assert.deepEqual(taskIds.slice(0, 10), [
+  assert.deepEqual(taskIds.slice(0, 7), [
     "tasks-7", "tasks-19", "tasks-20", "tasks-21", "tasks-22",
-    "tasks-23", "tasks-24", "tasks-16", "tasks-25", "tasks-26",
+    "tasks-23", "tasks-24",
   ]);
   const tasksGroup = page.locator(".challenge-group").filter({ hasText: "Tasks database" });
-  assert.equal(await tasksGroup.locator("li").count(), 26);
+  assert.equal(await tasksGroup.locator("li").count(), 20);
+  assert.equal(await page.locator(".challenge-list .diff-dot").count(), 0);
   for (const [index, { title, solution }] of tasksChallenges.entries()) {
     assert.equal(await tasksGroup.locator("li").nth(index).locator(".challenge-title-text").innerText(), title);
     await tasksGroup.locator("li").nth(index).click();
@@ -418,6 +419,7 @@ try {
       (selectedTitle) => document.querySelector(".challenge-head strong")?.textContent?.includes(selectedTitle),
       title
     );
+    assert.equal(await page.locator(".challenge-head").innerText(), title);
     await page.getByRole("button", { name: "Show solution" }).click();
     const displayed = await page.locator(".cm-content").innerText();
     assert.equal(displayed, `-- Reference solution for: ${title}\n${solution}`);
@@ -426,7 +428,7 @@ try {
       document.querySelector(".challenge-feedback")?.classList.contains("pass")
     );
   }
-  ok("Tasks challenge examples and all 26 answer checks");
+  ok("Tasks challenge examples and all 20 answer checks without difficulty indicators");
 
   const answerChallengeWith = async (title, sql) => {
     await tasksGroup.locator("li").filter({ hasText: title }).click();
@@ -473,6 +475,7 @@ try {
   assert.equal(await classGroup.locator("li").filter({ hasText: /explore/i }).count(), 0);
   await classGroup.locator("li").filter({ hasText: "Names and phones" }).click();
   await page.waitForFunction(() => document.querySelector(".challenge-head strong")?.textContent === "Names and phones");
+  assert.equal(await page.locator(".challenge-head").innerText(), "Names and phones");
   assert.match(await page.locator(".challenge-prompt").innerText(), /names and phones/i);
   await page.getByRole("button", { name: "Hint", exact: true }).click();
   assert.match(await page.locator(".challenge-hint").innerText(), /columns from user/i);

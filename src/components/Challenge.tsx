@@ -55,7 +55,6 @@ export function ChallengeList({
               >
                 <span className="check">{solved[c.id] ? "✓" : "○"}</span>
                 <span className="challenge-title-text">{c.title}</span>
-                <span className={`diff-dot ${c.difficulty.toLowerCase()}`} />
               </li>
             ))}
           </ul>
@@ -101,9 +100,6 @@ export function ChallengeBar({
   return (
     <div className="challenge-bar">
       <div className="challenge-head">
-        <span className={`diff-badge ${challenge.difficulty.toLowerCase()}`}>
-          {challenge.difficulty}
-        </span>
         <strong>{challenge.title}</strong>
       </div>
       <p className="challenge-prompt">{challenge.prompt}</p>

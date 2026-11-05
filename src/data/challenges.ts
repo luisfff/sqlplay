@@ -90,48 +90,6 @@ export const CHALLENGES: Challenge[] = [
     orderMatters: false,
   },
   {
-    id: "tasks-16",
-    title: "Tasks and their statuses",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return every task title with its status name. Column order: task title, status name.",
-    hint: "Match task.status_id to status.id.",
-    solution: `SELECT task.title, status.name
-FROM task
-JOIN status ON status.id = task.status_id;`,
-    orderMatters: false,
-  },
-  {
-    id: "tasks-25",
-    title: "Count tasks by status",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return each status name and the number of tasks with that status, including statuses with no tasks. Column order: status name, task count.",
-    hint: "Include every status, even those without tasks, when counting.",
-    solution: `SELECT status.name, COUNT(task.id)
-FROM status
-LEFT JOIN task ON task.status_id = status.id
-GROUP BY status.id, status.name;`,
-    orderMatters: false,
-  },
-  {
-    id: "tasks-26",
-    title: "Statuses by task count",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return all status names, ordered by number of tasks from most to fewest, including statuses with no tasks. Break ties by status name alphabetically.",
-    hint: "Count tasks for every status, then sort by count and name.",
-    solution: `SELECT status.name
-FROM status
-LEFT JOIN task ON task.status_id = status.id
-GROUP BY status.id, status.name
-ORDER BY COUNT(task.id) DESC, status.name ASC;`,
-    orderMatters: true,
-  },
-  {
     id: "tasks-1",
     title: "Task titles and IDs",
     difficulty: "Easy",
@@ -285,53 +243,6 @@ ORDER BY COUNT(task.id) DESC, status.name ASC;`,
 );`,
     orderMatters: false,
     checkDatabaseState: true,
-  },
-  {
-    id: "tasks-15",
-    title: "Create reminders table",
-    difficulty: "Easy",
-    datasetId: "tasks",
-    prompt:
-      "Create a table named reminder with columns in this order: id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL, remind_at DATETIME NOT NULL, sent INTEGER NOT NULL with default 0. Add a foreign key from task_id to task(id) with ON DELETE CASCADE.",
-    hint: "Specify DEFAULT 0 for sent and ON DELETE CASCADE on the foreign key.",
-    solution: `CREATE TABLE reminder (
-  id INTEGER PRIMARY KEY,
-  task_id INTEGER NOT NULL,
-  remind_at DATETIME NOT NULL,
-  sent INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE CASCADE
-);`,
-    orderMatters: false,
-    checkDatabaseState: true,
-  },
-  {
-    id: "tasks-17",
-    title: "Tasks and assigned users",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return every task title and its assigned user's name, including tasks with no assigned user (show NULL for that name). Column order: task title, user name. Order by task id ascending.",
-    hint: "Match task.user_id to user.id, preserving unassigned tasks.",
-    solution: `SELECT task.title, user.name
-FROM task
-LEFT JOIN user ON user.id = task.user_id
-ORDER BY task.id;`,
-    orderMatters: true,
-  },
-  {
-    id: "tasks-18",
-    title: "Tasks and tags",
-    difficulty: "Medium",
-    datasetId: "tasks",
-    prompt:
-      "Return the title of each tagged task and the name of each tag attached to it. Column order: task title, tag name. Order by task id, then tag id, both ascending.",
-    hint: "Use task_tag to identify the tags associated with each task.",
-    solution: `SELECT task.title, tag.name
-FROM task
-JOIN task_tag ON task_tag.task_id = task.id
-JOIN tag ON tag.id = task_tag.tag_id
-ORDER BY task.id, tag.id;`,
-    orderMatters: true,
   },
 ];
 
