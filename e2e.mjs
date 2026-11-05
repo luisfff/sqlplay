@@ -411,20 +411,31 @@ try {
   ]);
   const tasksGroup = page.locator(".challenge-group").filter({ hasText: "Tasks database" });
   assert.equal(await tasksGroup.locator("li").count(), 26);
-  for (const [index, { title }] of tasksChallenges.entries()) {
+  for (const [index, { title, solution, hideSolution }] of tasksChallenges.entries()) {
     assert.equal(await tasksGroup.locator("li").nth(index).locator(".challenge-title-text").innerText(), title);
     await tasksGroup.locator("li").nth(index).click();
     await page.waitForFunction(
       (selectedTitle) => document.querySelector(".challenge-head strong")?.textContent?.includes(selectedTitle),
       title
     );
-    await page.getByRole("button", { name: "Show solution" }).click();
+    const showSolution = page.getByRole("button", { name: "Show solution" });
+    if (hideSolution) {
+      assert.equal(await showSolution.count(), 0);
+      await page.locator(".cm-content").click();
+      await page.keyboard.press("Control+A");
+      await page.keyboard.insertText(solution);
+    } else {
+      await showSolution.click();
+      const displayed = await page.locator(".cm-content").innerText();
+      assert.doesNotMatch(displayed, /\bjoin\b/i);
+      assert.ok((displayed.match(/\bselect\b/gi) ?? []).length <= 1);
+    }
     await page.getByRole("button", { name: /Check answer/ }).click();
     await page.waitForFunction(() =>
       document.querySelector(".challenge-feedback")?.classList.contains("pass")
     );
   }
-  ok("Tasks challenge IDs, order, dataset, and all 26 reference solutions");
+  ok("Tasks challenge examples and all 26 answer checks");
 
   const answerChallengeWith = async (title, sql) => {
     await tasksGroup.locator("li").filter({ hasText: title }).click();

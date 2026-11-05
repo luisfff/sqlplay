@@ -10,6 +10,8 @@ export interface Challenge {
   hint?: string;
   /** Reference solution used to compute the expected result set. */
   solution: string;
+  /** Do not offer the reference query as an example to learners. */
+  hideSolution?: boolean;
   /** Whether row order is part of the correct answer. */
   orderMatters: boolean;
   /** Compare the resulting database state instead of a result set. */
@@ -45,7 +47,7 @@ export const CHALLENGES: Challenge[] = [
     datasetId: "tasks",
     prompt: "Return all columns of tasks marked Done.",
     hint: "Find the Done status in the status table and filter task.status_id.",
-    solution: "SELECT * FROM task WHERE status_id = (SELECT id FROM status WHERE name = 'Done');",
+    solution: "SELECT * FROM task WHERE status_id = 3;",
     orderMatters: false,
   },
   {
@@ -55,7 +57,7 @@ export const CHALLENGES: Challenge[] = [
     datasetId: "tasks",
     prompt: "Return all columns of tasks not marked Done.",
     hint: "Exclude the status id corresponding to Done.",
-    solution: "SELECT * FROM task WHERE status_id != (SELECT id FROM status WHERE name = 'Done');",
+    solution: "SELECT * FROM task WHERE status_id != 3;",
     orderMatters: false,
   },
   {
@@ -96,10 +98,11 @@ export const CHALLENGES: Challenge[] = [
     datasetId: "tasks",
     prompt:
       "Return every task title with its status name. Column order: task title, status name.",
-    hint: "Join task to status using status_id and id.",
+    hint: "Match task.status_id to status.id.",
     solution: `SELECT task.title, status.name
 FROM task
 JOIN status ON status.id = task.status_id;`,
+    hideSolution: true,
     orderMatters: false,
   },
   {
@@ -109,11 +112,12 @@ JOIN status ON status.id = task.status_id;`,
     datasetId: "tasks",
     prompt:
       "Return each status name and the number of tasks with that status, including statuses with no tasks. Column order: status name, task count.",
-    hint: "LEFT JOIN status to task, group by status, and count task IDs.",
+    hint: "Include every status, even those without tasks, when counting.",
     solution: `SELECT status.name, COUNT(task.id)
 FROM status
 LEFT JOIN task ON task.status_id = status.id
 GROUP BY status.id, status.name;`,
+    hideSolution: true,
     orderMatters: false,
   },
   {
@@ -123,12 +127,13 @@ GROUP BY status.id, status.name;`,
     datasetId: "tasks",
     prompt:
       "Return all status names, ordered by number of tasks from most to fewest, including statuses with no tasks. Break ties by status name alphabetically.",
-    hint: "Group a LEFT JOIN by status and order by the task count.",
+    hint: "Count tasks for every status, then sort by count and name.",
     solution: `SELECT status.name
 FROM status
 LEFT JOIN task ON task.status_id = status.id
 GROUP BY status.id, status.name
 ORDER BY COUNT(task.id) DESC, status.name ASC;`,
+    hideSolution: true,
     orderMatters: true,
   },
   {
@@ -311,11 +316,12 @@ ORDER BY COUNT(task.id) DESC, status.name ASC;`,
     datasetId: "tasks",
     prompt:
       "Return every task title and its assigned user's name, including tasks with no assigned user (show NULL for that name). Column order: task title, user name. Order by task id ascending.",
-    hint: "Use a LEFT JOIN from task to user.",
+    hint: "Match task.user_id to user.id, preserving unassigned tasks.",
     solution: `SELECT task.title, user.name
 FROM task
 LEFT JOIN user ON user.id = task.user_id
 ORDER BY task.id;`,
+    hideSolution: true,
     orderMatters: true,
   },
   {
@@ -325,12 +331,13 @@ ORDER BY task.id;`,
     datasetId: "tasks",
     prompt:
       "Return the title of each tagged task and the name of each tag attached to it. Column order: task title, tag name. Order by task id, then tag id, both ascending.",
-    hint: "Join task to task_tag, then task_tag to tag.",
+    hint: "Use task_tag to identify the tags associated with each task.",
     solution: `SELECT task.title, tag.name
 FROM task
 JOIN task_tag ON task_tag.task_id = task.id
 JOIN tag ON tag.id = task_tag.tag_id
 ORDER BY task.id, tag.id;`,
+    hideSolution: true,
     orderMatters: true,
   },
 ];
