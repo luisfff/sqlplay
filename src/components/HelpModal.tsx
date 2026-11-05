@@ -35,8 +35,7 @@ function AppHelp() {
           <strong>Playground</strong> — write and run any SQL against a dataset.
         </li>
         <li>
-          <strong>Challenges</strong> — Homework answers are checked automatically.
-          Class exercises are guided practice: run the steps and mark them complete yourself.
+          <strong>Challenges</strong> — Homework and class exercise answers are checked automatically.
         </li>
       </ul>
 

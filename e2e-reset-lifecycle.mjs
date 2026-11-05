@@ -112,9 +112,11 @@ window.confirm = () => { window.handles.confirmations++; return window.handles.a
   await page.getByRole("button", { name: "Show solution" }).click();
   await page.getByRole("button", { name: /Check answer/ }).click();
   await page.waitForSelector(".challenge-feedback.pass");
-  await page.locator(".challenge-group li").filter({ hasText: "2.5 Explore the database" }).click();
+  await page.locator(".challenge-group li").filter({ hasText: "Names and phones" }).click();
   await challengeReady();
-  await page.getByRole("button", { name: "Mark complete" }).click();
+  await page.getByRole("button", { name: "Show solution" }).click();
+  await page.getByRole("button", { name: /Check answer/ }).click();
+  await page.waitForSelector(".challenge-feedback.pass");
   assert.match(await page.locator(".challenge-progress").innerText(), /Homework solved 1\//);
   assert.match(await page.locator(".challenge-group-title").last().innerText(), /Completed 1\//i);
   await setSql("CREATE TABLE reset_test (id INTEGER);");
@@ -161,8 +163,8 @@ window.confirm = () => { window.handles.confirmations++; return window.handles.a
   assert.match(await page.getByRole("status").innerText(), /Challenge progress and current database reset/);
   assert.match(await page.locator(".challenge-progress").innerText(), /Homework solved 0\//);
   assert.match(await page.locator(".challenge-group-title").last().innerText(), /Completed 0\//i);
-  assert.equal(await page.getByRole("button", { name: "Mark complete" }).isEnabled(), true);
-  assert.match(await page.locator(".cm-content").innerText(), /Write SQL and click Run/);
+  assert.equal(await page.getByRole("button", { name: /Check answer/ }).isEnabled(), true);
+  assert.match(await page.locator(".cm-content").innerText(), /Write your query below/);
   assert.deepEqual(await page.evaluate(() => ({
     solved: localStorage.getItem("sqlplay.solved.v1"),
     history: localStorage.getItem("sqlplay.history.v1"),

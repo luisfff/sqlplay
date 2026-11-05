@@ -32,7 +32,7 @@ tables, or count items.
 
 ## Use datasets for challenges
 
-Select **Challenges** to find **Homework** and **Class exercises**. Each homework
+Select **Challenges** to find **Homework** and **Class exercises**. Each
 challenge has a question to answer using data. SQLPlay loads its dataset
 so you can focus on the question rather than setting up the data.
 
@@ -49,10 +49,9 @@ homework and class exercise progress and restores the current challenge's
 database and starter query. Saved datasets and query history are kept.
 
 Class exercises follow the [Databases Week 1 session plan](https://github.com/luisfff/hack-your-future-presentations/blob/main/hackyourfuture-databases-week1-session-plan.md).
-Select an exercise and use **Run** to work through its steps on the same
-database. Mark it complete yourself when finished; class exercises are not
-automatically checked. Selecting another exercise starts a fresh database, so
-complete related steps together and copy any SQL you want to keep.
+Each question is a separate challenge with a hint and example solution.
+Answers are checked against a fresh database; updates, inserts, deletes, and
+table creation are checked by comparing the resulting database state.
 
 ## Tips
 
