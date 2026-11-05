@@ -295,7 +295,7 @@ export default function App() {
   }, [activeChallenge]);
 
   const showSolution = useCallback(() => {
-    if (!activeChallenge) return;
+    if (!activeChallenge || activeChallenge.hideSolution) return;
     setQuery(
       `-- Reference solution for: ${activeChallenge.title}\n${activeChallenge.solution}`
     );
