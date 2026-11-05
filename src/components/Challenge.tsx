@@ -144,11 +144,9 @@ export function ChallengeBar({
             {showHint ? "Hide hint" : "Hint"}
           </button>
         )}
-        {!challenge.hideSolution && (
-          <button className="btn" onClick={onShowSolution}>
-            Show solution
-          </button>
-        )}
+        <button className="btn" onClick={onShowSolution}>
+          Show solution
+        </button>
       </div>
 
       {showHint && challenge.hint && (

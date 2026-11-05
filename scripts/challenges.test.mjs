@@ -23,16 +23,9 @@ test("assignment challenges are first, unique, and return the requested results"
   assert.deepEqual(CHALLENGES.slice(0, 10).map((c) => c.id), ids);
   assert.equal(new Set(CHALLENGES.map((c) => c.id)).size, CHALLENGES.length);
   assert.equal(new Set(CHALLENGES.map((c) => c.title)).size, CHALLENGES.length);
-  assert.deepEqual(
-    CHALLENGES.filter((c) => c.hideSolution).map((c) => c.id).sort(),
-    ["tasks-16", "tasks-17", "tasks-18", "tasks-25", "tasks-26"]
-  );
   for (const challenge of CHALLENGES) {
     assert.doesNotMatch(challenge.hint ?? "", /\bjoin\b|\bsubquer(?:y|ies)\b/i, challenge.id);
-    if (!challenge.hideSolution) {
-      assert.doesNotMatch(challenge.solution, /\bjoin\b/i, challenge.id);
-      assert.ok((challenge.solution.match(/\bselect\b/gi) ?? []).length <= 1, challenge.id);
-    }
+    assert.ok(challenge.solution.trim(), challenge.id);
   }
   const challenges = Object.fromEntries(CHALLENGES.map((c) => [c.id, c]));
   const db = new SQL.Database();

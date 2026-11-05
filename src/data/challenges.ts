@@ -10,8 +10,6 @@ export interface Challenge {
   hint?: string;
   /** Reference solution used to compute the expected result set. */
   solution: string;
-  /** Do not offer the reference query as an example to learners. */
-  hideSolution?: boolean;
   /** Whether row order is part of the correct answer. */
   orderMatters: boolean;
   /** Compare the resulting database state instead of a result set. */
@@ -102,7 +100,6 @@ export const CHALLENGES: Challenge[] = [
     solution: `SELECT task.title, status.name
 FROM task
 JOIN status ON status.id = task.status_id;`,
-    hideSolution: true,
     orderMatters: false,
   },
   {
@@ -117,7 +114,6 @@ JOIN status ON status.id = task.status_id;`,
 FROM status
 LEFT JOIN task ON task.status_id = status.id
 GROUP BY status.id, status.name;`,
-    hideSolution: true,
     orderMatters: false,
   },
   {
@@ -133,7 +129,6 @@ FROM status
 LEFT JOIN task ON task.status_id = status.id
 GROUP BY status.id, status.name
 ORDER BY COUNT(task.id) DESC, status.name ASC;`,
-    hideSolution: true,
     orderMatters: true,
   },
   {
@@ -321,7 +316,6 @@ ORDER BY COUNT(task.id) DESC, status.name ASC;`,
 FROM task
 LEFT JOIN user ON user.id = task.user_id
 ORDER BY task.id;`,
-    hideSolution: true,
     orderMatters: true,
   },
   {
@@ -337,7 +331,6 @@ FROM task
 JOIN task_tag ON task_tag.task_id = task.id
 JOIN tag ON tag.id = task_tag.tag_id
 ORDER BY task.id, tag.id;`,
-    hideSolution: true,
     orderMatters: true,
   },
 ];
