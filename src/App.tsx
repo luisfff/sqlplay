@@ -322,10 +322,7 @@ export default function App() {
   }, [activeChallenge]);
 
   const showSolution = useCallback(() => {
-    if (
-      !activeChallenge ||
-      activeChallenge.hideSolution
-    ) return;
+    if (!activeChallenge) return;
     setQuery(
       `-- Reference solution for: ${activeChallenge.title}\n${activeChallenge.solution}`
     );
