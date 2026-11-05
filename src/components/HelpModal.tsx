@@ -93,11 +93,8 @@ function AppHelp() {
         <li>
           <strong>Reset current dataset</strong> restores the selected sample's
           seed or a saved dataset's snapshot, discarding unsaved database changes.
-        </li>
-        <li>
-          <strong>Reset to Tasks database</strong> always switches to a fresh
-          Tasks seed and its starter query. Both resets ask for confirmation;
-          cancel changes nothing. Neither changes saved datasets, history or progress.
+          It asks for confirmation; cancel changes nothing. Saved datasets, history,
+          and progress are kept.
         </li>
         <li>
           In Challenges, <strong>Reset challenges</strong> clears all homework

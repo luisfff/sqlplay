@@ -61,12 +61,12 @@ window.confirm = () => { window.handles.confirmations++; return window.handles.a
   assert.equal(await page.evaluate(() => window.handles.closed), 1);
   await page.evaluate(() => { window.handles.delay = 0; });
   for (let i = 0; i < 15; i++) {
-    await page.getByRole("button", { name: "Reset to Tasks database", exact: true }).click();
+    await page.getByRole("button", { name: "Reset current dataset", exact: true }).click();
     await ready();
     await balanced();
   }
   await page.evaluate(() => { window.handles.fail = true; });
-  await page.getByRole("button", { name: "Reset to Tasks database", exact: true }).click();
+  await page.getByRole("button", { name: "Reset current dataset", exact: true }).click();
   await ready();
   await balanced();
   assert.match(await page.getByRole("status").innerText(), /Failed to load dataset/);
@@ -78,10 +78,8 @@ window.confirm = () => { window.handles.confirmations++; return window.handles.a
     window.handles.delay = 200;
     window.handles.confirmations = 0;
   });
-  await page.getByRole("button", { name: "Reset to Tasks database", exact: true }).click();
-  for (const name of ["Reset current dataset", "Reset to Tasks database"]) {
-    assert.equal(await page.getByRole("button", { name, exact: true }).isDisabled(), true);
-  }
+  await page.getByRole("button", { name: "Reset current dataset", exact: true }).click();
+  assert.equal(await page.getByRole("button", { name: "Reset current dataset", exact: true }).isDisabled(), true);
   assert.equal(await page.getByRole("button", { name: /Run/ }).first().isDisabled(), true);
   assert.equal(await page.locator(".controls select").isDisabled(), true);
   assert.equal(await page.evaluate(() => document.querySelector(".workspace").inert), true);

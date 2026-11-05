@@ -127,7 +127,9 @@ try {
   assert.deepEqual(await resultRows(), [["0", "0"]]);
   ok("Original Tasks counts, Unicode, nullable values, timestamps and FK constraints/cascades");
 
-  await reset("Reset to Tasks database");
+  assert.equal(await page.getByRole("button", { name: /Reset.*dataset|Reset to Tasks database/i }).count(), 1);
+  assert.equal(await page.getByRole("button", { name: "Reset to Tasks database", exact: true }).count(), 0);
+  await reset("Reset current dataset");
   await execute("SELECT * FROM task ORDER BY id;");
   const pristineTasks = await resultRows();
   await execute("UPDATE task SET title = 'Changed' WHERE id = 1; DELETE FROM task WHERE id = 2; INSERT INTO tag VALUES (6, 'Extra'); DROP TABLE task_tag; CREATE TABLE extra (id INTEGER);");
@@ -136,21 +138,21 @@ try {
   const queryBeforeCancel = await page.locator(".cm-content").innerText();
   const resultsBeforeCancel = await page.locator(".results").innerText();
   const statusBeforeCancel = await page.getByRole("status").innerText();
-  for (const name of ["Reset current dataset", "Reset to Tasks database"]) {
-    await reset(name, false);
-    assert.equal(await page.locator(".schema-tree").innerText(), beforeCancel);
-    assert.equal(await page.locator(".cm-content").innerText(), queryBeforeCancel);
-    assert.equal(await page.locator(".results").innerText(), resultsBeforeCancel);
-    assert.equal(await page.getByRole("status").innerText(), statusBeforeCancel);
-  }
+  await reset("Reset current dataset", false);
+  assert.equal(await page.locator(".schema-tree").innerText(), beforeCancel);
+  assert.equal(await page.locator(".cm-content").innerText(), queryBeforeCancel);
+  assert.equal(await page.locator(".results").innerText(), resultsBeforeCancel);
+  assert.equal(await page.getByRole("status").innerText(), statusBeforeCancel);
   await reset("Reset current dataset");
   assert.equal(await page.locator(".controls select").inputValue(), "tasks");
+  assert.equal(await page.locator(".cm-content").innerText(), queryBeforeCancel);
   await execute("SELECT * FROM task ORDER BY id;");
   assert.deepEqual(await resultRows(), pristineTasks);
   for (let i = 0; i < 5; i++) {
-    await reset("Reset to Tasks database");
+    const queryBeforeReset = await page.locator(".cm-content").innerText();
+    await reset("Reset current dataset");
     assert.equal(await page.locator(".controls select").inputValue(), "tasks");
-    assert.equal(await page.locator(".cm-content").innerText(), starter);
+    assert.equal(await page.locator(".cm-content").innerText(), queryBeforeReset);
     assert.equal(await page.locator(".results").count(), 0);
     assert.doesNotMatch(await page.locator(".schema-tree").innerText(), /extra/);
     await execute("SELECT * FROM task ORDER BY id;");
@@ -162,7 +164,7 @@ try {
   await ready();
   await page.getByRole("button", { name: /Run/ }).first().click();
   assert.equal(await page.locator(".results tbody tr").count(), 12);
-  ok("Both reset modes, cancellation, pristine schema/data and repeated resets");
+  ok("Current dataset reset, cancellation, pristine schema/data and repeated resets");
 
   // Clean hero screenshot of the Playground with results.
   await page.screenshot({ path: "docs/screenshot-playground.png" });
@@ -195,7 +197,7 @@ try {
   await page.locator(".data-toolbar select").selectOption("task");
   await page.getByRole("button", { name: /Add row/ }).click();
   assert.equal(await page.locator(".draft-row").count(), 1);
-  await reset("Reset to Tasks database");
+  await reset("Reset current dataset");
   assert.equal(await page.locator(".draft-row").count(), 0);
   assert.equal(await page.locator(".data-msg").innerText(), "");
   await page.locator(".data-toolbar select").selectOption("task");
@@ -251,16 +253,19 @@ try {
   assert.doesNotMatch(await page.locator(".schema-tree").innerText(), /unsaved/);
   await execute("DROP TABLE author;");
   const historyBeforeReset = await page.evaluate(() => localStorage.getItem("sqlplay.history.v1"));
-  await reset("Reset to Tasks database");
-  assert.equal(await page.locator(".controls select").inputValue(), "tasks");
-  assert.equal(await page.locator(".cm-content").innerText(), starter);
+  await reset("Reset current dataset");
+  assert.equal(await page.locator(".controls select").inputValue(), savedId);
+  assert.match(await page.locator(".cm-content").innerText(), /DROP TABLE author/);
   assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.userDatasets.v1")), savedSnapshot);
   assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.history.v1")), historyBeforeReset);
-  await page.locator(".controls select").selectOption(savedId);
-  await ready();
   await execute("SELECT name FROM author;");
   assert.deepEqual(await resultRows(), [["X"]]);
-  ok("Saved snapshot resets retain identity; Tasks reset leaves snapshots/history intact");
+  await page.locator(".controls select").selectOption("tasks");
+  await ready();
+  assert.equal(await page.locator(".cm-content").innerText(), starter);
+  await page.locator(".controls select").selectOption(savedId);
+  await ready();
+  ok("Saved snapshot resets retain identity, editor, snapshots and history; dataset selection switches to Tasks");
 
   // Corrupt a snapshot without changing the active DB; a failed reset must not swap it.
   await page.evaluate(() => {
@@ -499,7 +504,7 @@ try {
   ok("Mutation/DDL no-op and wrong answers fail; correct changes retry safely and stay isolated");
 
   const solvedBeforeReset = await page.evaluate(() => localStorage.getItem("sqlplay.solved.v1"));
-  await reset("Reset to Tasks database");
+  await reset("Reset current dataset");
   assert.equal(await page.evaluate(() => localStorage.getItem("sqlplay.solved.v1")), solvedBeforeReset);
   ok("Challenge behavior and solved progress survive Playground resets");
 
