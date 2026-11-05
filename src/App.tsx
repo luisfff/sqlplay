@@ -22,6 +22,7 @@ import {
   pushHistory,
   clearHistory,
   loadSolved,
+  clearSolved,
   markSolved,
   type HistoryEntry,
 } from "./lib/history";
@@ -36,6 +37,10 @@ import {
 
 type Mode = "play" | "learn";
 type OutputView = "results" | "diagram" | "data";
+
+function challengeStarter(activity: Activity): string {
+  return `-- ${activity.title}\n-- ${isClassExercise(activity) ? "Write SQL and click Run." : 'Write your query below, then click "Check answer".'}\n\n`;
+}
 
 async function freshDatasetDb(datasetId: string): Promise<InMemoryDatabase> {
   const db = await InMemoryDatabase.create();
@@ -101,7 +106,7 @@ export default function App() {
 
   // Open either a built-in sample or a saved user dataset (prefixed "user:").
   const openDataset = useCallback(
-    async (value: string, nextQuery?: string, successStatus?: string, requireSavedSnapshot = false) => {
+    async (value: string, nextQuery?: string, successStatus?: string, requireSavedSnapshot = false, beforeSwap?: () => void) => {
       if (pendingRef.current) return false;
       pendingRef.current = true;
       setLoading(true);
@@ -122,6 +127,7 @@ export default function App() {
         const nextSchema = candidate.schema();
         const nextForeignKeys = candidate.foreignKeys();
         if (generation !== generationRef.current) return false;
+        beforeSwap?.();
         const previous = activeDbRef.current;
         activeDbRef.current = candidate;
         setDb(candidate);
@@ -240,12 +246,33 @@ export default function App() {
       if (pendingRef.current) return;
       const loaded = await openDataset(
         c.datasetId,
-        `-- ${c.title}\n-- ${isClassExercise(c) ? "Write SQL and click Run." : 'Write your query below, then click "Check answer".'}\n\n`
+        challengeStarter(c)
       );
       if (loaded) setActiveChallenge(c);
     },
     [openDataset]
   );
+
+  const resetChallenges = useCallback(() => {
+    if (!db || !activeChallenge || pendingRef.current) return;
+    if (!window.confirm(
+      "Reset all homework and class exercise progress and restore the current challenge's database and starter query? Unsaved database changes and the current query will be discarded. Saved datasets and query history will be kept."
+    )) return;
+    void openDataset(
+      activeChallenge.datasetId,
+      challengeStarter(activeChallenge),
+      "Challenge progress and current database reset.",
+      false,
+      () => {
+        try {
+          clearSolved();
+        } catch (err) {
+          throw new Error(`Could not clear challenge progress: ${String(err)}`);
+        }
+        setSolved({});
+      }
+    );
+  }, [db, activeChallenge, openDataset]);
 
   const checkChallenge = useCallback(async () => {
     if (!activeChallenge || isClassExercise(activeChallenge) || pendingRef.current) return;
@@ -394,6 +421,11 @@ export default function App() {
                 Reset to Tasks database
               </button>
             </>
+          )}
+          {mode === "learn" && (
+            <button className="btn" onClick={resetChallenges} disabled={!db || !activeChallenge || loading}>
+              Reset challenges
+            </button>
           )}
           <button className="btn" onClick={() => setShowHistory((s) => !s)}>
             🕑 History
