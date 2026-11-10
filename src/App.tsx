@@ -9,6 +9,7 @@ import {
 } from "./engine/db";
 import { DEFAULT_DATASET_ID, SAMPLE_DATASETS, findDataset } from "./data/samples";
 import { CHALLENGES, type Challenge } from "./data/challenges";
+import { CLASS_EXERCISES } from "./data/classExercises";
 import { SqlEditor } from "./components/SqlEditor";
 import { ResultsTable } from "./components/ResultsTable";
 import { SchemaTree } from "./components/SchemaTree";
@@ -17,6 +18,7 @@ import { ERDiagram } from "./components/ERDiagram";
 import { DataEditor } from "./components/DataEditor";
 import { HelpModal } from "./components/HelpModal";
 import { compareResults, type CompareResult } from "./lib/compare";
+import { formatChallengeSql } from "./lib/challengeExport";
 import {
   loadHistory,
   pushHistory,
@@ -323,6 +325,24 @@ export default function App() {
     );
   }, [activeChallenge]);
 
+  const downloadChallenges = useCallback(() => {
+    const blob = new Blob(
+      [
+        formatChallengeSql([
+          { title: "Homework", challenges: CHALLENGES },
+          { title: "Class exercises", challenges: CLASS_EXERCISES },
+        ]),
+      ],
+      { type: "text/sql;charset=utf-8" }
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sqlplay-challenges.sql";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }, []);
+
   const switchMode = useCallback(
     (m: Mode) => {
       if (pendingRef.current) return;
@@ -411,9 +431,14 @@ export default function App() {
             </>
           )}
           {mode === "learn" && (
-            <button className="btn" onClick={resetChallenges} disabled={!db || !activeChallenge || loading}>
-              Reset challenges
-            </button>
+            <>
+              <button className="btn" onClick={downloadChallenges}>
+                Download challenges
+              </button>
+              <button className="btn" onClick={resetChallenges} disabled={!db || !activeChallenge || loading}>
+                Reset challenges
+              </button>
+            </>
           )}
           <button className="btn" onClick={() => setShowHistory((s) => !s)}>
             🕑 History

@@ -259,6 +259,10 @@ Switch to **Challenges** in the top bar.
   when the prompt requires ordering, with numeric tolerance for decimals.
 - Use **Hint** for a nudge, or **Show solution** to drop the reference query
   into the editor.
+- Click **Download challenges** to save all homework and class exercise
+  questions, hints, and reference solutions as `sqlplay-challenges.sql`. The
+  prompts and solutions are SQL comments, so the file is safe to open or run;
+  run each solution against a fresh copy of its dataset.
 - Solved challenges are remembered across sessions.
 
 ---

@@ -115,3 +115,33 @@ test("class exercises are individual challenges with valid, meaningful solutions
     db.close();
   }
 });
+
+test("challenge SQL export includes every prompt and solution as safe SQL comments", async () => {
+  const [{ CHALLENGES }, { CLASS_EXERCISES }, { formatChallengeSql }] =
+    await Promise.all([
+      loadDataModule("../src/data/challenges.ts"),
+      loadDataModule("../src/data/classExercises.ts"),
+      loadDataModule("../src/lib/challengeExport.ts"),
+    ]);
+  const sql = formatChallengeSql([
+    { title: "Homework", challenges: CHALLENGES },
+    { title: "Class exercises", challenges: CLASS_EXERCISES },
+  ]);
+  const lines = sql.split("\n");
+
+  assert.match(sql, /-- Homework/);
+  assert.match(sql, /-- Class exercises/);
+  for (const challenge of [...CHALLENGES, ...CLASS_EXERCISES]) {
+    assert.ok(sql.includes(`-- ${challenge.title} (${challenge.difficulty})`));
+    const promptLines = challenge.prompt
+      .split(/\r?\n/)
+      .map((line, index) => `-- ${index === 0 ? "Question: " : ""}${line}`);
+    for (const promptLine of promptLines) {
+      assert.ok(lines.includes(promptLine), challenge.id);
+    }
+    for (const statementLine of `Reference solution:\n${challenge.solution}`.split("\n")) {
+      assert.ok(lines.includes(`-- ${statementLine}`), challenge.id);
+    }
+  }
+  assert.ok(lines.every((line) => line === "" || line.startsWith("-- ")));
+});
